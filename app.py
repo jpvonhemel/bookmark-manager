@@ -12,8 +12,17 @@ def get_db():
     return conn
 
 
+DEFAULT_BOOKMARKS = [
+    ("Anthropic", "https://anthropic.com", "AI"),
+    ("Google", "https://google.com", "Search"),
+    ("Vanguard", "https://vanguard.com", "Finance"),
+    ("GitHub", "https://github.com", "Development"),
+    ("Pulse", "https://pulse.vonhemel.com", "Personal"),
+]
+
+
 def init_db():
-    """Create the bookmarks table if it doesn't exist."""
+    """Create the bookmarks table and add defaults if empty."""
     conn = get_db()
     conn.execute(
         """
@@ -26,6 +35,13 @@ def init_db():
         )
         """
     )
+    # Only seed defaults if the table is empty (fresh install)
+    count = conn.execute("SELECT COUNT(*) FROM bookmarks").fetchone()[0]
+    if count == 0:
+        conn.executemany(
+            "INSERT INTO bookmarks (title, url, category) VALUES (?, ?, ?)",
+            DEFAULT_BOOKMARKS,
+        )
     conn.commit()
     conn.close()
 
