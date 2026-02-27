@@ -23,15 +23,15 @@
             {% if bookmarks %}
                 {% for bookmark in bookmarks %}
                 <div class="bookmark-card">
-                    <div class="bookmark-info">
-                        <a href="{{ bookmark.url }}" target="_blank" class="bookmark-title">
-                            {{ bookmark.title }}
-                        </a>
-                        <span class="bookmark-url">{{ bookmark.url }}</span>
-                        {% if bookmark.category %}
-                            <span class="bookmark-category">{{ bookmark.category }}</span>
-                        {% endif %}
-                    </div>
+                    <a href="{{ bookmark.url }}" target="_blank" class="bookmark-link">
+                        <div class="bookmark-info">
+                            <span class="bookmark-title">{{ bookmark.title }}</span>
+                            <span class="bookmark-url">{{ bookmark.url }}</span>
+                            {% if bookmark.category %}
+                                <span class="bookmark-category">{{ bookmark.category }}</span>
+                            {% endif %}
+                        </div>
+                    </a>
                     <form action="/delete/{{ bookmark.id }}" method="POST" class="delete-form">
                         <button type="submit" class="delete-btn">&times;</button>
                     </form>

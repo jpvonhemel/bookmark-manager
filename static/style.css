@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 500px;
     margin: 0 auto;
     padding: 40px 20px;
 }
@@ -72,9 +72,7 @@ h1 {
 
 .bookmark-card {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
     background-color: #16213e;
     border-radius: 8px;
     border: 1px solid #333;
@@ -82,6 +80,15 @@ h1 {
 
 .bookmark-card:hover {
     border-color: #e94560;
+}
+
+.bookmark-link {
+    flex: 1;
+    display: block;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
 }
 
 .bookmark-info {
@@ -93,13 +100,8 @@ h1 {
 
 .bookmark-title {
     color: #e94560;
-    text-decoration: none;
     font-weight: bold;
     font-size: 16px;
-}
-
-.bookmark-title:hover {
-    text-decoration: underline;
 }
 
 .bookmark-url {
