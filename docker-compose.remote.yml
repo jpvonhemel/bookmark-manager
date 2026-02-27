@@ -1,0 +1,12 @@
+services:
+  bookmark-manager:
+    build: .
+    ports:
+      - "5001:5000"
+    environment:
+      - DB_HOST=CHANGE_ME_TO_DOCKER_UBUNTU_IP
+      - DB_PORT=5432
+      - DB_NAME=bookmarks
+      - DB_USER=bookmarks
+      - DB_PASS=changeme_secure_password
+    restart: unless-stopped
