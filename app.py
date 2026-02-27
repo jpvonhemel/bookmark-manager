@@ -1,14 +1,26 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
-DATABASE = "bookmarks.db"
+
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+DB_NAME = os.environ.get("DB_NAME", "bookmarks")
+DB_USER = os.environ.get("DB_USER", "bookmarks")
+DB_PASS = os.environ.get("DB_PASS", "bookmarks")
 
 
 def get_db():
-    """Connect to the SQLite database."""
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row  # So we can access columns by name
+    """Connect to the PostgreSQL database."""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASS,
+    )
     return conn
 
 
@@ -24,10 +36,11 @@ DEFAULT_BOOKMARKS = [
 def init_db():
     """Create the bookmarks table and add defaults if empty."""
     conn = get_db()
-    conn.execute(
+    cur = conn.cursor()
+    cur.execute(
         """
         CREATE TABLE IF NOT EXISTS bookmarks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             url TEXT NOT NULL,
             category TEXT DEFAULT '',
@@ -36,13 +49,15 @@ def init_db():
         """
     )
     # Only seed defaults if the table is empty (fresh install)
-    count = conn.execute("SELECT COUNT(*) FROM bookmarks").fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM bookmarks")
+    count = cur.fetchone()[0]
     if count == 0:
-        conn.executemany(
-            "INSERT INTO bookmarks (title, url, category) VALUES (?, ?, ?)",
+        cur.executemany(
+            "INSERT INTO bookmarks (title, url, category) VALUES (%s, %s, %s)",
             DEFAULT_BOOKMARKS,
         )
     conn.commit()
+    cur.close()
     conn.close()
 
 
@@ -50,9 +65,10 @@ def init_db():
 def index():
     """Show all bookmarks."""
     conn = get_db()
-    bookmarks = conn.execute(
-        "SELECT * FROM bookmarks ORDER BY created_at DESC"
-    ).fetchall()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM bookmarks ORDER BY created_at DESC")
+    bookmarks = cur.fetchall()
+    cur.close()
     conn.close()
     return render_template("index.html", bookmarks=bookmarks)
 
@@ -65,11 +81,13 @@ def add_bookmark():
     category = request.form.get("category", "")
 
     conn = get_db()
-    conn.execute(
-        "INSERT INTO bookmarks (title, url, category) VALUES (?, ?, ?)",
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO bookmarks (title, url, category) VALUES (%s, %s, %s)",
         (title, url, category),
     )
     conn.commit()
+    cur.close()
     conn.close()
     return redirect(url_for("index"))
 
@@ -78,8 +96,10 @@ def add_bookmark():
 def delete_bookmark(bookmark_id):
     """Delete a bookmark."""
     conn = get_db()
-    conn.execute("DELETE FROM bookmarks WHERE id = ?", (bookmark_id,))
+    cur = conn.cursor()
+    cur.execute("DELETE FROM bookmarks WHERE id = %s", (bookmark_id,))
     conn.commit()
+    cur.close()
     conn.close()
     return redirect(url_for("index"))
 
