@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Bookmark Manager</h1>
+
+        <!-- Add Bookmark Form -->
+        <form action="/add" method="POST" class="add-form">
+            <input type="text" name="title" placeholder="Title" required>
+            <input type="url" name="url" placeholder="https://example.com" required>
+            <input type="text" name="category" placeholder="Category (optional)">
+            <button type="submit">Add Bookmark</button>
+        </form>
+
+        <!-- Bookmarks List -->
+        <div class="bookmarks">
+            {% if bookmarks %}
+                {% for bookmark in bookmarks %}
+                <div class="bookmark-card">
+                    <div class="bookmark-info">
+                        <a href="{{ bookmark.url }}" target="_blank" class="bookmark-title">
+                            {{ bookmark.title }}
+                        </a>
+                        <span class="bookmark-url">{{ bookmark.url }}</span>
+                        {% if bookmark.category %}
+                            <span class="bookmark-category">{{ bookmark.category }}</span>
+                        {% endif %}
+                    </div>
+                    <form action="/delete/{{ bookmark.id }}" method="POST" class="delete-form">
+                        <button type="submit" class="delete-btn">&times;</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-message">No bookmarks yet. Add one above!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
